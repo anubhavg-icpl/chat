@@ -1,53 +1,115 @@
+# Open OSCAR Server — build everything from this repo.
+# Usage:
+#   OSCAR_HOST=ras.dev docker compose up -d --build
+#
+# Optional one-shots (also built from local Dockerfiles):
+#   OSCAR_HOST=ras.dev docker compose run --rm cert-gen
+#   docker compose run --rm nss-gen
+
 services:
   cert-gen:
+    build:
+      context: .
+      dockerfile: Dockerfile.certgen
     image: ras-certgen:latest
     volumes:
       - ./certs:/work/certs
     working_dir: /work/certs
-    entrypoint: [ "/bin/sh", "-c" ]
     environment:
-      - OSCAR_HOST=${OSCAR_HOST}
+      OSCAR_HOST: ${OSCAR_HOST:-localhost}
+    entrypoint: ["/bin/sh", "-c"]
     command:
-      - "openssl req -x509 -newkey rsa:1024
-         -keyout key.pem
-         -out cert.pem
-         -sha256 -days 365 -nodes
-         -subj \"/CN=${OSCAR_HOST}\"
-         && cat cert.pem key.pem > server.pem
-         && rm cert.pem key.pem"
+      - |
+        set -e
+        if [ -f server.pem ]; then
+          echo "certs/server.pem already exists, skipping generation"
+          exit 0
+        fi
+        echo "Generating self-signed cert for CN=$${OSCAR_HOST}"
+        openssl req -x509 -newkey rsa:1024 \
+          -keyout key.pem \
+          -out cert.pem \
+          -sha256 -days 365 -nodes \
+          -subj "/CN=$${OSCAR_HOST}"
+        cat cert.pem key.pem > server.pem
+        rm -f cert.pem key.pem
+        echo "Wrote server.pem"
+    restart: "no"
 
   nss-gen:
+    build:
+      context: .
+      dockerfile: Dockerfile.certgen
     image: ras-certgen:latest
     volumes:
       - ./certs:/work/certs
     working_dir: /work/certs
-    entrypoint: [ "/bin/sh", "-c" ]
+    depends_on:
+      cert-gen:
+        condition: service_completed_successfully
+    entrypoint: ["/bin/sh", "-c"]
     command:
-      - "rm -rf nss
-         && mkdir -p nss
-         && certutil -N -d nss --empty-password
-         && certutil -A -n \"RAS\" -t \"CT,,C\" -i server.pem -d nss"
+      - |
+        set -e
+        if [ ! -f server.pem ]; then
+          echo "certs/server.pem missing; run cert-gen first" >&2
+          exit 1
+        fi
+        if [ -d nss ] && { [ -f nss/cert8.db ] || [ -f nss/cert9.db ]; }; then
+          echo "certs/nss already exists, skipping generation"
+          exit 0
+        fi
+        rm -rf nss
+        mkdir -p nss
+        certutil -N -d nss --empty-password
+        certutil -A -n "RAS" -t "CT,,C" -i server.pem -d nss
+        echo "Wrote certs/nss/"
+    restart: "no"
+    profiles: ["nss"]
 
   open-oscar-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: ras:latest
+    depends_on:
+      cert-gen:
+        condition: service_completed_successfully
     ports:
       - "5190:5190"
       - "8080:8080"
       - "9898:9898"
       - "1088:1088"
       - "4000:4000/udp"
-    env_file:
-      - ./config/ssl/settings.env
+    environment:
+      # Compose overrides win over values in the config file (godotenv does not override).
+      API_LISTENER: "0.0.0.0:8080"
+      DB_PATH: "/data/oscar.sqlite"
+      OSCAR_ADVERTISED_LISTENERS_SSL: "LOCAL://${OSCAR_HOST:-localhost}:5193"
     volumes:
-      - .:/project
-    working_dir: /project
+      - oscar-data:/data
+      - ./config:/config:ro
+    command: ["/app/open_oscar_server", "-config", "/config/ssl/settings.env"]
+    restart: unless-stopped
 
   stunnel:
-    image: ras-stunnel:5.75-openssl-1.0.2u
+    build:
+      context: .
+      dockerfile: Dockerfile.stunnel
+    image: ras-stunnel:5.76-openssl-1.0.2u
+    depends_on:
+      cert-gen:
+        condition: service_completed_successfully
+      open-oscar-server:
+        condition: service_started
     ports:
       - "443:443"
       - "5193:5193"
     volumes:
       - ./config/ssl/stunnel.conf:/etc/stunnel/stunnel.conf:ro
       - ./certs:/etc/stunnel/certs:ro
-    command: stunnel.conf
+    command: ["stunnel.conf"]
+    restart: unless-stopped
+
+volumes:
+  oscar-data:

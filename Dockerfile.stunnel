@@ -67,8 +67,8 @@ ENV LD_LIBRARY_PATH="/usr/local/openssl/lib"
 RUN mkdir -p /etc/stunnel
 
 WORKDIR /etc/stunnel
-EXPOSE 443 1088
+EXPOSE 443 5193
 
 ENTRYPOINT ["stunnel"]
-# You can pass the config file name as CMD or at `docker run` time, e.g.:
+# Pass the config file name as CMD or at `docker run` time, e.g.:
 # CMD ["stunnel.conf"]

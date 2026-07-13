@@ -7,13 +7,16 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o open_oscar_server ./cmd/server
+# pure-Go sqlite (modernc.org/sqlite); no CGO required
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o open_oscar_server ./cmd/server
 
-FROM alpine:latest
+FROM alpine:3.21
+
+RUN apk add --no-cache ca-certificates
 
 WORKDIR /app
 
-COPY --from=builder /app/open_oscar_server /app/
+COPY --from=builder /app/open_oscar_server /app/open_oscar_server
 
 EXPOSE 5190 8080 9898 1088 4000/udp
 

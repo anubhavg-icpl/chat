@@ -94,27 +94,28 @@ release-sign: ## Full GoReleaser on host with Windows signing (needs $(GORELEASE
 	SKIP_CODE_SIGN=0 $(GORELEASER) --clean
 
 .PHONY: docker-image-ras
-docker-image-ras: ## Build Open OSCAR Server image
-	docker build -t ras:latest -f Dockerfile .
+docker-image-ras: ## Build Open OSCAR Server image from local Dockerfile
+	docker compose build open-oscar-server
 
 .PHONY: docker-image-stunnel
-docker-image-stunnel: ## Build stunnel image pinned to v5.75 / OpenSSL 1.0.2u
-	docker build -t ras-stunnel:5.75-openssl-1.0.2u -f Dockerfile.stunnel .
+docker-image-stunnel: ## Build stunnel image (OpenSSL 1.0.2u) from local Dockerfile
+	docker compose build stunnel
 
 .PHONY: docker-image-certgen
-docker-image-certgen: ## Build minimal helper image with openssl & nss tools
-	docker build -t ras-certgen:latest -f Dockerfile.certgen .
+docker-image-certgen: ## Build certgen helper image from local Dockerfile
+	docker compose build cert-gen
 
 .PHONY: docker-images
-docker-images: docker-image-ras docker-image-stunnel docker-image-certgen
+docker-images: ## Build all images from local Dockerfiles (no registry pulls)
+	docker compose build
 
 .PHONY: docker-run
-docker-run:
-	OSCAR_HOST=$(OSCAR_HOST) docker compose up open-oscar-server stunnel
+docker-run: ## Build from repo and run Open OSCAR Server + stunnel (foreground)
+	OSCAR_HOST=$(OSCAR_HOST) docker compose up --build open-oscar-server stunnel cert-gen
 
 .PHONY: docker-run-bg
-docker-run-bg: ## Run Open OSCAR Server in background with docker-compose
-	OSCAR_HOST=$(OSCAR_HOST) docker compose up -d open-oscar-server stunnel
+docker-run-bg: ## Build from repo and run in background
+	OSCAR_HOST=$(OSCAR_HOST) docker compose up -d --build
 
 .PHONY: docker-run-stop
 docker-run-stop: ## Stop Open OSCAR Server docker-compose services
@@ -139,11 +140,11 @@ run-stunnel: # run stunnel for SSL termination
 .PHONY: docker-cert
 docker-cert: clean-certs ## Create SSL certificates for server
 	mkdir -p certs/
-	OSCAR_HOST=$(OSCAR_HOST) docker compose run --no-TTY --rm cert-gen
+	OSCAR_HOST=$(OSCAR_HOST) docker compose run --no-TTY --rm --build cert-gen
 
 .PHONY: docker-nss
 docker-nss: ## Create NSS certificate database for AIM 6.x clients
-	OSCAR_HOST=$(OSCAR_HOST) docker compose run --no-TTY --rm nss-gen
+	OSCAR_HOST=$(OSCAR_HOST) docker compose --profile nss run --no-TTY --rm --build nss-gen
 
 .PHONY: clean-certs
 clean-certs: ## Remove all generated certificates & NSS DB
