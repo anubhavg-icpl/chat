@@ -111,5 +111,24 @@ services:
     command: ["stunnel.conf"]
     restart: unless-stopped
 
+  # Operator console (SPA + nginx API proxy)
+  # UI: http://localhost:3000  |  /api -> open-oscar-server:8080
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    image: ras-console:latest
+    depends_on:
+      - open-oscar-server
+    ports:
+      - "3000:80"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
 volumes:
   oscar-data:

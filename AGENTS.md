@@ -19,6 +19,8 @@ AOL/Yahoo and non-commercial.
 | Generate config     | `make config`                                              |
 | Regenerate mocks    | `mockery`                                                  |
 | Build Docker images | `make docker-images`                                       |
+| Operator console    | `cd web && npm ci && npm run dev` (UI :3000, API proxy)    |
+| Console (Docker)    | `docker compose up -d --build web` → http://localhost:3000 |
 
 ## Architecture
 
@@ -31,6 +33,7 @@ The binary in `cmd/server` starts five servers concurrently via `errgroup`:
 | Kerberos | Kerberos auth              | 1088                                |
 | MgmtAPI  | HTTP (management)          | 8080                                |
 | WebAPI   | HTTP (web AIM-style, AMF3) | 9000 (opt-in via `ENABLE_WEBAPI=1`) |
+| Console  | SPA + nginx (`web/`)       | 3000 (`/api` → MgmtAPI)             |
 
 All five servers share a common dependency container (`Container` in
 `cmd/server/factory.go`) that wires together config, persistence, and business

@@ -109,12 +109,16 @@ docker-image-certgen: ## Build certgen helper image from local Dockerfile
 docker-images: ## Build all images from local Dockerfiles (no registry pulls)
 	docker compose build
 
+.PHONY: docker-image-console
+docker-image-console: ## Build operator console image
+	docker compose build web
+
 .PHONY: docker-run
 docker-run: ## Build from repo and run Open OSCAR Server + stunnel (foreground)
 	OSCAR_HOST=$(OSCAR_HOST) docker compose up --build open-oscar-server stunnel cert-gen
 
 .PHONY: docker-run-bg
-docker-run-bg: ## Build from repo and run in background
+docker-run-bg: ## Build from repo and run full stack in background (incl. console)
 	OSCAR_HOST=$(OSCAR_HOST) docker compose up -d --build
 
 .PHONY: docker-run-stop

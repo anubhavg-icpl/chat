@@ -6,3 +6,6 @@ dist/
 certs/
 .vscode/
 .cursor/
+node_modules/
+web/node_modules/
+web/dist/
