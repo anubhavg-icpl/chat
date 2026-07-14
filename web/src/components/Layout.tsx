@@ -1,35 +1,35 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 const links = [
-  { to: "/", label: "dashboard", end: true },
-  { to: "/users", label: "users" },
-  { to: "/sessions", label: "sessions" },
-  { to: "/chat", label: "chat rooms" },
-  { to: "/directory", label: "directory" },
-  { to: "/webapi", label: "webapi keys" },
-  { to: "/im", label: "send im" },
+  { to: "/", label: "Dashboard", end: true },
+  { to: "/users", label: "Users" },
+  { to: "/sessions", label: "Sessions" },
+  { to: "/chat", label: "Chat rooms" },
+  { to: "/directory", label: "Directory" },
+  { to: "/webapi", label: "Web API keys" },
+  { to: "/im", label: "Send IM" },
 ];
 
 const titles: Record<string, string> = {
-  "/": "system overview + api probe",
-  "/users": "users · account · feedbag · links",
-  "/sessions": "active sessions",
-  "/chat": "chat rooms",
-  "/directory": "keyword directory",
-  "/webapi": "web api keys",
-  "/im": "instant message relay",
+  "/": "System overview",
+  "/users": "User management",
+  "/sessions": "Active sessions",
+  "/chat": "Chat rooms",
+  "/directory": "Keyword directory",
+  "/webapi": "Web API keys",
+  "/im": "Instant message relay",
 };
 
 export function Layout() {
   const { pathname } = useLocation();
-  const title = titles[pathname] || "console";
+  const title = titles[pathname] || "Console";
 
   return (
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <strong>open-oscar // console</strong>
-          <span>full mgmt API · terminal UI</span>
+          <strong>Open OSCAR Console</strong>
+          <span>Management API · :8080</span>
         </div>
         <nav className="nav">
           {links.map((link) => (
@@ -39,25 +39,25 @@ export function Layout() {
               end={link.end}
               className={({ isActive }) => (isActive ? "active" : undefined)}
             >
-              <span className="prefix">$</span>
+              <span className="prefix">›</span>
               <span>{link.label}</span>
             </NavLink>
           ))}
         </nav>
         <div className="sidebar-footer">
           <div>
-            target: <span className="ok">/api → :8080</span>
+            Proxy: <span className="ok">/api → open-oscar-server:8080</span>
           </div>
-          <div>apis: users sessions chat dir webapi feedbag im</div>
+          <div>Ports: 5190 · 5193 · 8080 · 9898 · 1088</div>
         </div>
       </aside>
       <div className="main">
         <header className="topbar">
           <h1>
-            root@oscar
-            <span>/ {title}</span>
+            {title}
+            <span>Operator console</span>
           </h1>
-          <div className="badge online">● live</div>
+          <div className="badge online">Live</div>
         </header>
         <main className="content">
           <Outlet />

@@ -46,7 +46,7 @@ export function Sessions() {
   }
 
   return (
-    <div className="card holo-card">
+    <div className="card">
       <div className="card-head">
         <span>sessions · auto-refresh 5s</span>
         <button className="btn ghost" type="button" onClick={() => void load()}>

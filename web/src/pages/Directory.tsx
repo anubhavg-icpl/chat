@@ -116,7 +116,7 @@ export function Directory() {
     <>
       {msg && <div className={`msg ${msg.type}`}>{msg.text}</div>}
       <div className="grid split">
-        <div className="card holo-card">
+        <div className="card">
           <div className="card-head">
             <span>GET/POST /directory/category</span>
             <button className="btn ghost" type="button" onClick={() => void loadCats()}>
@@ -185,7 +185,7 @@ export function Directory() {
           </div>
         </div>
 
-        <div className="card holo-card">
+        <div className="card">
           <div className="card-head">
             <span>
               {selected != null

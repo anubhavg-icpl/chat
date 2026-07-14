@@ -61,7 +61,7 @@ export function ChatRooms() {
 
   return (
     <>
-      <div className="card holo-card">
+      <div className="card">
         <div className="card-head">
           <span>create public room</span>
           <button className="btn ghost" type="button" onClick={() => void load()}>
@@ -115,7 +115,7 @@ function RoomTable({
   canDelete?: boolean;
 }) {
   return (
-    <div className="card holo-card">
+    <div className="card">
       <div className="card-head">
         <span>{title}</span>
       </div>

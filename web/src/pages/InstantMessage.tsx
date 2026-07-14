@@ -26,7 +26,7 @@ export function InstantMessage() {
 
   return (
     <div className="grid split">
-      <div className="card holo-card">
+      <div className="card">
         <div className="card-head">
           <span>compose</span>
         </div>

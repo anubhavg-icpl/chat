@@ -8,7 +8,7 @@ export function TerminalFrame({
   children: ReactNode;
 }) {
   return (
-    <section className="terminal holo-card">
+    <section className="terminal">
       <div className="terminal-bar">
         <span className="dots">
           <i />

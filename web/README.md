@@ -6,7 +6,7 @@ Operator UI for the Open OSCAR Server management API.
 
 - React 19 + TypeScript + Vite
 - nginx reverse-proxy (`/api` → management API `:8080`)
-- crow.rip-inspired holographic neon theme
+- Professional dark operator UI with selective neon glow accents
 
 ## Features
 

@@ -82,7 +82,7 @@ export function WebApiKeys() {
 
   return (
     <>
-      <div className="card holo-card">
+      <div className="card">
         <div className="card-head">
           <span>POST /admin/webapi/keys</span>
           <button className="btn ghost" type="button" onClick={() => void load()}>
@@ -131,7 +131,7 @@ export function WebApiKeys() {
         </div>
       </div>
 
-      <div className="card holo-card">
+      <div className="card">
         <div className="card-head">
           <span>GET /admin/webapi/keys · {keys.length}</span>
         </div>

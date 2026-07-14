@@ -222,7 +222,7 @@ export function Users() {
 
   return (
     <>
-      <div className="card holo-card">
+      <div className="card">
         <div className="card-head">
           <span>create user · POST /user</span>
           <button className="btn ghost" type="button" onClick={() => void load()}>
@@ -262,7 +262,7 @@ export function Users() {
       </div>
 
       <div className="grid split">
-        <div className="card holo-card">
+        <div className="card">
           <div className="card-head">
             <span>GET /user · {users.length}</span>
           </div>
@@ -333,7 +333,7 @@ export function Users() {
           </div>
         </div>
 
-        <div className="card holo-card">
+        <div className="card">
           <div className="card-head">
             <span>
               {selected

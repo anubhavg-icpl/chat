@@ -49,7 +49,7 @@ export function Dashboard() {
         setError("");
       } catch (e) {
         if (!alive) return;
-        setError(e instanceof Error ? e.message : "failed to load dashboard");
+        setError(e instanceof Error ? e.message : "Failed to load dashboard");
       } finally {
         if (alive) setLoading(false);
       }
@@ -67,34 +67,34 @@ export function Dashboard() {
   return (
     <>
       <div className="grid stats">
-        <div className="card holo-card stat">
-          <div className="label">accounts</div>
+        <div className="card stat">
+          <div className="label">Accounts</div>
           <div className="value">{loading ? "…" : users.length}</div>
           <div className="hint">
-            {aimUsers} aim · {icqUsers} icq
+            {aimUsers} AIM · {icqUsers} ICQ
           </div>
         </div>
-        <div className="card holo-card stat">
-          <div className="label">online</div>
+        <div className="card stat">
+          <div className="label">Online</div>
           <div className="value">{loading ? "…" : online}</div>
-          <div className="hint">active sessions</div>
+          <div className="hint">Active sessions</div>
         </div>
-        <div className="card holo-card stat">
-          <div className="label">chat rooms</div>
+        <div className="card stat">
+          <div className="label">Chat rooms</div>
           <div className="value">{loading ? "…" : rooms}</div>
-          <div className="hint">public + private</div>
+          <div className="hint">Public + private</div>
         </div>
-        <div className="card holo-card stat">
-          <div className="label">webapi keys</div>
+        <div className="card stat">
+          <div className="label">Web API keys</div>
           <div className="value">{loading ? "…" : keys.length}</div>
-          <div className="hint">{categories} dir categories</div>
+          <div className="hint">{categories} directory categories</div>
         </div>
       </div>
 
       <div className="grid split">
-        <TerminalFrame title="oscar-console — boot + version">
+        <TerminalFrame title="server status">
           <p className="logline">
-            <span className="cmd">$ curl /api/version</span>
+            <span className="cmd">GET /api/version</span>
           </p>
           <p className="logline">
             <span className="ok">
@@ -104,36 +104,36 @@ export function Dashboard() {
           </p>
           <p className="logline">
             <span className="muted">
-              ports: 5190 oscar · 5193 ssl · 8080 mgmt · 9898 toc · 1088 kerberos
-              · 3000 console
+              listeners: 5190 OSCAR · 5193 SSL · 8080 Mgmt · 9898 TOC · 1088
+              Kerberos · 3000 Console
             </span>
           </p>
           {error ? (
             <p className="logline">
-              <span className="err">✗ {error}</span>
+              <span className="err">error: {error}</span>
             </p>
           ) : (
             <p className="logline">
-              <span className="cmd">$ </span>
+              <span className="cmd">status: ready </span>
               <span className="cursor" />
             </p>
           )}
         </TerminalFrame>
 
-        <div className="card holo-card">
+        <div className="card">
           <div className="card-head">
             <span>
-              api probe · {okCount}/{probes.length} ok
+              API health · {okCount}/{probes.length} ok
             </span>
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>method</th>
-                  <th>path</th>
-                  <th>status</th>
-                  <th>result</th>
+                  <th>Method</th>
+                  <th>Path</th>
+                  <th>Status</th>
+                  <th>Result</th>
                 </tr>
               </thead>
               <tbody>
@@ -144,7 +144,7 @@ export function Dashboard() {
                     <td>{p.status || "—"}</td>
                     <td>
                       <span className={`badge ${p.ok ? "online" : "away"}`}>
-                        {p.ok ? "ok" : p.detail || "fail"}
+                        {p.ok ? "OK" : p.detail || "fail"}
                       </span>
                     </td>
                   </tr>
