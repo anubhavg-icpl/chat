@@ -9,6 +9,10 @@
 # Standalone client bots (tocbot, aibot, discord-bridge, irc-bridge) are opt-in
 # via the "bots" profile; they do NOT start on a plain `docker compose up`:
 #   docker compose --profile bots up -d --build
+#
+# Observability stack (metrics-exporter, prometheus, grafana) is opt-in via the
+# "observability" profile; it does NOT start on a plain `docker compose up`:
+#   docker compose --profile observability up -d --build
 
 services:
   cert-gen:
@@ -227,6 +231,62 @@ services:
       TOCBOT_SERVER: ${TOCBOT_SERVER:-open-oscar-server:9898}
       TOCBOT_SCREENNAME: ${TOCBOT_SCREENNAME:-}
       TOCBOT_PASSWORD: ${TOCBOT_PASSWORD:-}
+    restart: unless-stopped
+
+  # ------------------------------------------------------------------
+  # Observability stack (metrics exporter + Prometheus + Grafana).
+  #
+  # Gated behind the "observability" profile so a plain
+  # `docker compose up` is unaffected.
+  #
+  # Start with:
+  #   docker compose --profile observability up -d --build
+  # Grafana: http://localhost:3030  (admin/admin)
+  # Prometheus: http://localhost:9091
+  # ------------------------------------------------------------------
+
+  # Scrapes the Management API and exposes Prometheus metrics on :9090.
+  metrics-exporter:
+    profiles: ["observability"]
+    build:
+      context: .
+      dockerfile: Dockerfile.clients
+      args:
+        TARGET: metrics-exporter
+    image: ras-metrics-exporter:latest
+    depends_on:
+      - open-oscar-server
+    environment:
+      OSCAR_API: http://open-oscar-server:8080
+      METRICS_ADDR: ":9090"
+      METRICS_SCRAPE_INTERVAL: ${METRICS_SCRAPE_INTERVAL:-15s}
+    restart: unless-stopped
+
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:latest
+    depends_on:
+      - metrics-exporter
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9091:9090"
+    restart: unless-stopped
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3030:3000"
     restart: unless-stopped
 
 volumes:

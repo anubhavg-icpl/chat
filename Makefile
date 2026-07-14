@@ -129,6 +129,10 @@ docker-run-stop: ## Stop Open OSCAR Server docker-compose services
 docker-bots: ## Build & run bot/bridge containers (compose profile: bots; pass secrets via env)
 	OSCAR_HOST=$(OSCAR_HOST) docker compose --profile bots up -d --build
 
+.PHONY: docker-observability
+docker-observability: ## Run metrics exporter + Prometheus + Grafana (compose profile: observability)
+	OSCAR_HOST=$(OSCAR_HOST) docker compose --profile observability up -d --build
+
 .PHONY: run
 run: # run the server with plain socket config
 	./scripts/run_dev.sh ./config/settings.env
