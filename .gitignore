@@ -18,3 +18,4 @@ web/dist/
 /aibot
 /discord-bridge
 /irc-bridge
+/metrics-exporter

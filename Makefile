@@ -125,6 +125,10 @@ docker-run-bg: ## Build from repo and run full stack in background (incl. consol
 docker-run-stop: ## Stop Open OSCAR Server docker-compose services
 	OSCAR_HOST=$(OSCAR_HOST) docker compose down
 
+.PHONY: docker-bots
+docker-bots: ## Build & run bot/bridge containers (compose profile: bots; pass secrets via env)
+	OSCAR_HOST=$(OSCAR_HOST) docker compose --profile bots up -d --build
+
 .PHONY: run
 run: # run the server with plain socket config
 	./scripts/run_dev.sh ./config/settings.env
@@ -195,3 +199,7 @@ irc-bridge: ## Build the IRC<->AIM bridge (stdlib IRC)
 
 .PHONY: bridges
 bridges: discord-bridge irc-bridge ## Build all bridges
+
+.PHONY: metrics-exporter
+metrics-exporter: ## Build the Prometheus metrics exporter for the MgmtAPI
+	go build -o metrics-exporter ./cmd/metrics-exporter

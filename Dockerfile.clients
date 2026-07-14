@@ -1,0 +1,28 @@
+# Reusable multi-stage Dockerfile for the standalone client binaries
+# (tocbot, aibot, discord-bridge, irc-bridge).
+#
+# Build ONE binary by passing TARGET=<cmd name>, e.g.:
+#   docker build -f Dockerfile.clients --build-arg TARGET=tocbot -t ras-tocbot .
+
+FROM golang:1.26.2-alpine AS builder
+
+ARG TARGET
+
+WORKDIR /app
+
+ENV CGO_ENABLED=0
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN go build -trimpath -ldflags="-s -w" -o /out/app ./cmd/${TARGET}
+
+FROM gcr.io/distroless/static-debian12:nonroot
+
+WORKDIR /app
+
+COPY --from=builder /out/app /app
+
+ENTRYPOINT ["/app"]

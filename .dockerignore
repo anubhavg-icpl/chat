@@ -17,3 +17,16 @@ docs/
 docker-compose.yaml
 Dockerfile*
 scripts/
+
+# Built binaries (avoid leaking host artifacts into the build context)
+tocbot
+oscar-admin
+aibot
+discord-bridge
+irc-bridge
+open_oscar_server
+webapi_keygen
+
+# Frontend build artifacts
+web/node_modules
+web/dist

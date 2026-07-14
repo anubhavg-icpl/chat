@@ -5,6 +5,10 @@
 # Optional one-shots (also built from local Dockerfiles):
 #   OSCAR_HOST=ras.dev docker compose run --rm cert-gen
 #   docker compose run --rm nss-gen
+#
+# Standalone client bots (tocbot, aibot, discord-bridge, irc-bridge) are opt-in
+# via the "bots" profile; they do NOT start on a plain `docker compose up`:
+#   docker compose --profile bots up -d --build
 
 services:
   cert-gen:
@@ -128,6 +132,101 @@ services:
       timeout: 3s
       retries: 3
       start_period: 10s
+    restart: unless-stopped
+
+  # ------------------------------------------------------------------
+  # Standalone client bots.
+  #
+  # These are TOC/AIM clients that dial OUT to open-oscar-server (or an
+  # external network). They publish no host ports and are gated behind the
+  # "bots" Compose profile so a plain `docker compose up` is unaffected.
+  #
+  # Start them with:
+  #   docker compose --profile bots up -d --build
+  # ------------------------------------------------------------------
+
+  # Minimal echo/time/ping TOC bot.
+  tocbot:
+    profiles: ["bots"]
+    build:
+      context: .
+      dockerfile: Dockerfile.clients
+      args:
+        TARGET: tocbot
+    image: ras-tocbot:latest
+    depends_on:
+      - open-oscar-server
+    environment:
+      TOCBOT_SERVER: ${TOCBOT_SERVER:-open-oscar-server:9898}
+      TOCBOT_SCREENNAME: ${TOCBOT_SCREENNAME:-}
+      TOCBOT_PASSWORD: ${TOCBOT_PASSWORD:-}
+      TOCBOT_AWAY: ${TOCBOT_AWAY:-}
+    restart: unless-stopped
+
+  # LLM-backed AIM bot (OpenAI-compatible API).
+  aibot:
+    profiles: ["bots"]
+    build:
+      context: .
+      dockerfile: Dockerfile.clients
+      args:
+        TARGET: aibot
+    image: ras-aibot:latest
+    depends_on:
+      - open-oscar-server
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      AIBOT_SYSTEM_PROMPT: ${AIBOT_SYSTEM_PROMPT:-}
+      AIBOT_HISTORY_LIMIT: ${AIBOT_HISTORY_LIMIT:-8}
+      TOCBOT_SERVER: ${TOCBOT_SERVER:-open-oscar-server:9898}
+      TOCBOT_SCREENNAME: ${TOCBOT_SCREENNAME:-}
+      TOCBOT_PASSWORD: ${TOCBOT_PASSWORD:-}
+    restart: unless-stopped
+
+  # Discord <-> AIM bridge.
+  discord-bridge:
+    profiles: ["bots"]
+    build:
+      context: .
+      dockerfile: Dockerfile.clients
+      args:
+        TARGET: discord-bridge
+    image: ras-discord-bridge:latest
+    depends_on:
+      - open-oscar-server
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN:-}
+      DISCORD_CHANNEL_ID: ${DISCORD_CHANNEL_ID:-}
+      AIM_TO: ${AIM_TO:-}
+      BRIDGE_TRIGGER: ${BRIDGE_TRIGGER:-}
+      TOCBOT_SERVER: ${TOCBOT_SERVER:-open-oscar-server:9898}
+      TOCBOT_SCREENNAME: ${TOCBOT_SCREENNAME:-}
+      TOCBOT_PASSWORD: ${TOCBOT_PASSWORD:-}
+    restart: unless-stopped
+
+  # IRC <-> AIM bridge.
+  irc-bridge:
+    profiles: ["bots"]
+    build:
+      context: .
+      dockerfile: Dockerfile.clients
+      args:
+        TARGET: irc-bridge
+    image: ras-irc-bridge:latest
+    depends_on:
+      - open-oscar-server
+    environment:
+      IRC_SERVER: ${IRC_SERVER:-}
+      IRC_PORT: ${IRC_PORT:-6667}
+      IRC_TLS: ${IRC_TLS:-false}
+      IRC_NICK: ${IRC_NICK:-}
+      IRC_CHANNEL: ${IRC_CHANNEL:-}
+      AIM_TO: ${AIM_TO:-}
+      TOCBOT_SERVER: ${TOCBOT_SERVER:-open-oscar-server:9898}
+      TOCBOT_SCREENNAME: ${TOCBOT_SCREENNAME:-}
+      TOCBOT_PASSWORD: ${TOCBOT_PASSWORD:-}
     restart: unless-stopped
 
 volumes:
