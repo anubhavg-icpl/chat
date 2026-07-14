@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, type Session } from "../api/client";
+import { Button } from "@/components/ui/button";
 
 function formatDuration(seconds?: number) {
   const s = Math.max(0, Math.floor(seconds || 0));
@@ -49,9 +50,9 @@ export function Sessions() {
     <div className="card">
       <div className="card-head">
         <span>sessions · auto-refresh 5s</span>
-        <button className="btn ghost" type="button" onClick={() => void load()}>
+        <Button variant="outline" type="button" onClick={() => void load()}>
           refresh
-        </button>
+        </Button>
       </div>
       {error && <div className="msg err" style={{ margin: 16 }}>{error}</div>}
       <div className="table-wrap">
@@ -104,13 +105,13 @@ export function Sessions() {
                         : "—"}
                     </td>
                     <td>
-                      <button
-                        className="btn danger"
+                      <Button
+                        variant="destructive"
                         type="button"
                         onClick={() => void kick(s.screen_name)}
                       >
                         kick
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { api } from "../api/client";
+import { Button } from "@/components/ui/button";
 import { TerminalFrame } from "../components/TerminalFrame";
 
 export function InstantMessage() {
@@ -62,9 +63,7 @@ export function InstantMessage() {
                 required
               />
             </div>
-            <button className="btn" type="submit">
-              send im
-            </button>
+            <Button type="submit">send im</Button>
           </form>
           {error && <div className="msg err" style={{ marginTop: 12 }}>{error}</div>}
         </div>

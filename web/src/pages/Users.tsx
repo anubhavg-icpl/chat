@@ -5,6 +5,7 @@ import {
   type User,
   type UserAccount,
 } from "../api/client";
+import { Button } from "@/components/ui/button";
 
 export function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -225,9 +226,9 @@ export function Users() {
       <div className="card">
         <div className="card-head">
           <span>create user · POST /user</span>
-          <button className="btn ghost" type="button" onClick={() => void load()}>
+          <Button variant="outline" type="button" onClick={() => void load()}>
             refresh
-          </button>
+          </Button>
         </div>
         <div className="card-body">
           <form className="row" onSubmit={onCreate}>
@@ -249,9 +250,7 @@ export function Users() {
                 required
               />
             </div>
-            <button className="btn" type="submit">
-              create
-            </button>
+            <Button type="submit">create</Button>
           </form>
           {msg && (
             <div className={`msg ${msg.type}`} style={{ marginTop: 12 }}>
@@ -303,8 +302,8 @@ export function Users() {
                       <td>{u.suspended_status || "active"}</td>
                       <td>
                         <div className="actions">
-                          <button
-                            className="btn ghost"
+                          <Button
+                            variant="outline"
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -312,9 +311,9 @@ export function Users() {
                             }}
                           >
                             passwd
-                          </button>
-                          <button
-                            className="btn danger"
+                          </Button>
+                          <Button
+                            variant="destructive"
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -322,7 +321,7 @@ export function Users() {
                             }}
                           >
                             delete
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -376,23 +375,23 @@ export function Users() {
                 </div>
 
                 <div className="actions">
-                  <button className="btn ghost" type="button" onClick={onToggleBot}>
+                  <Button variant="outline" type="button" onClick={onToggleBot}>
                     toggle bot
-                  </button>
-                  <button
-                    className="btn ghost"
+                  </Button>
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={() => void onSuspend("suspended")}
                   >
                     suspend
-                  </button>
-                  <button
-                    className="btn ghost"
+                  </Button>
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={() => void onSuspend(null)}
                   >
                     clear suspend
-                  </button>
+                  </Button>
                 </div>
 
                 {account.profile && (
@@ -412,14 +411,14 @@ export function Users() {
                       {linked.map((l) => (
                         <li key={l}>
                           {l}{" "}
-                          <button
-                            className="btn danger"
+                          <Button
+                            variant="destructive"
+                            size="xs"
                             type="button"
-                            style={{ padding: "2px 8px" }}
                             onClick={() => void onRemoveLink(l)}
                           >
                             unlink
-                          </button>
+                          </Button>
                         </li>
                       ))}
                     </ul>
@@ -432,9 +431,7 @@ export function Users() {
                         onChange={(e) => setLinkName(e.target.value)}
                       />
                     </div>
-                    <button className="btn" type="submit">
-                      link
-                    </button>
+                    <Button type="submit">link</Button>
                   </form>
                 </div>
 
@@ -463,16 +460,16 @@ export function Users() {
                             {g.buddies.map((b) => (
                               <li key={`${g.group_id}-${b.name}`}>
                                 {b.name}{" "}
-                                <button
-                                  className="btn danger"
+                                <Button
+                                  variant="destructive"
+                                  size="xs"
                                   type="button"
-                                  style={{ padding: "2px 8px" }}
                                   onClick={() =>
                                     void onRemoveBuddy(g.group_id, b.name)
                                   }
                                 >
                                   rm
-                                </button>
+                                </Button>
                               </li>
                             ))}
                           </ul>
@@ -488,9 +485,7 @@ export function Users() {
                         onChange={(e) => setGroupName(e.target.value)}
                       />
                     </div>
-                    <button className="btn" type="submit">
-                      add group
-                    </button>
+                    <Button type="submit">add group</Button>
                   </form>
                   <form className="row" onSubmit={onAddBuddy} style={{ marginTop: 8 }}>
                     <div className="field">
@@ -511,9 +506,7 @@ export function Users() {
                         onChange={(e) => setBuddyName(e.target.value)}
                       />
                     </div>
-                    <button className="btn" type="submit">
-                      add buddy
-                    </button>
+                    <Button type="submit">add buddy</Button>
                   </form>
                 </div>
               </div>

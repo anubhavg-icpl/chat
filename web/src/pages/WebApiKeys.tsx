@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { api, type WebAPIKey } from "../api/client";
+import { Button } from "@/components/ui/button";
 
 export function WebApiKeys() {
   const [keys, setKeys] = useState<WebAPIKey[]>([]);
@@ -85,9 +86,9 @@ export function WebApiKeys() {
       <div className="card">
         <div className="card-head">
           <span>POST /admin/webapi/keys</span>
-          <button className="btn ghost" type="button" onClick={() => void load()}>
+          <Button variant="outline" type="button" onClick={() => void load()}>
             refresh
-          </button>
+          </Button>
         </div>
         <div className="card-body">
           <form className="row" onSubmit={onCreate}>
@@ -114,9 +115,7 @@ export function WebApiKeys() {
                 onChange={(e) => setRateLimit(Number(e.target.value))}
               />
             </div>
-            <button className="btn" type="submit">
-              create key
-            </button>
+            <Button type="submit">create key</Button>
           </form>
           {msg && (
             <div className={`msg ${msg.type}`} style={{ marginTop: 12 }}>
@@ -166,20 +165,20 @@ export function WebApiKeys() {
                     </td>
                     <td>
                       <div className="actions">
-                        <button
-                          className="btn ghost"
+                        <Button
+                          variant="outline"
                           type="button"
                           onClick={() => void onToggle(k)}
                         >
                           toggle
-                        </button>
-                        <button
-                          className="btn danger"
+                        </Button>
+                        <Button
+                          variant="destructive"
                           type="button"
                           onClick={() => void onDelete(k.dev_id)}
                         >
                           delete
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>

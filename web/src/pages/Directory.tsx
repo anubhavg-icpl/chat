@@ -4,6 +4,7 @@ import {
   type DirectoryCategory,
   type DirectoryKeyword,
 } from "../api/client";
+import { Button } from "@/components/ui/button";
 
 export function Directory() {
   const [categories, setCategories] = useState<DirectoryCategory[]>([]);
@@ -119,9 +120,9 @@ export function Directory() {
         <div className="card">
           <div className="card-head">
             <span>GET/POST /directory/category</span>
-            <button className="btn ghost" type="button" onClick={() => void loadCats()}>
+            <Button variant="outline" type="button" onClick={() => void loadCats()}>
               refresh
-            </button>
+            </Button>
           </div>
           <div className="card-body">
             <form className="row" onSubmit={onCreateCat}>
@@ -133,9 +134,7 @@ export function Directory() {
                   required
                 />
               </div>
-              <button className="btn" type="submit">
-                create
-              </button>
+              <Button type="submit">create</Button>
             </form>
           </div>
           <div className="table-wrap">
@@ -166,8 +165,8 @@ export function Directory() {
                       <td>{c.id}</td>
                       <td>{c.name}</td>
                       <td>
-                        <button
-                          className="btn danger"
+                        <Button
+                          variant="destructive"
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -175,7 +174,7 @@ export function Directory() {
                           }}
                         >
                           delete
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -209,9 +208,7 @@ export function Directory() {
                       required
                     />
                   </div>
-                  <button className="btn" type="submit">
-                    add keyword
-                  </button>
+                  <Button type="submit">add keyword</Button>
                 </form>
                 <div className="table-wrap" style={{ marginTop: 12 }}>
                   {keywords.length === 0 ? (
@@ -231,13 +228,13 @@ export function Directory() {
                             <td>{k.id}</td>
                             <td>{k.name}</td>
                             <td>
-                              <button
-                                className="btn danger"
+                              <Button
+                                variant="destructive"
                                 type="button"
                                 onClick={() => void onDeleteKw(k.id)}
                               >
                                 delete
-                              </button>
+                              </Button>
                             </td>
                           </tr>
                         ))}

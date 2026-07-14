@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { api, type ChatRoom } from "../api/client";
+import { Button } from "@/components/ui/button";
 
 export function ChatRooms() {
   const [publicRooms, setPublicRooms] = useState<ChatRoom[]>([]);
@@ -64,9 +65,9 @@ export function ChatRooms() {
       <div className="card">
         <div className="card-head">
           <span>create public room</span>
-          <button className="btn ghost" type="button" onClick={() => void load()}>
+          <Button variant="outline" type="button" onClick={() => void load()}>
             refresh
-          </button>
+          </Button>
         </div>
         <div className="card-body">
           <form className="row" onSubmit={onCreate}>
@@ -79,9 +80,7 @@ export function ChatRooms() {
                 required
               />
             </div>
-            <button className="btn" type="submit">
-              create
-            </button>
+            <Button type="submit">create</Button>
           </form>
           {msg && <div className={`msg ${msg.type}`} style={{ marginTop: 12 }}>{msg.text}</div>}
         </div>
@@ -144,13 +143,13 @@ function RoomTable({
                   </td>
                   {canDelete && (
                     <td>
-                      <button
-                        className="btn danger"
+                      <Button
+                        variant="destructive"
                         type="button"
                         onClick={() => onDelete?.(r.name)}
                       >
                         delete
-                      </button>
+                      </Button>
                     </td>
                   )}
                 </tr>
