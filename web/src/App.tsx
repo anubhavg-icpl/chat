@@ -1,5 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ConfirmProvider } from "./components/ConfirmProvider";
 import { Layout } from "./components/Layout";
+import { Toaster } from "./components/ui/sonner";
 import { ChatRooms } from "./pages/ChatRooms";
 import { Dashboard } from "./pages/Dashboard";
 import { Directory } from "./pages/Directory";
@@ -11,18 +13,21 @@ import { WebApiKeys } from "./pages/WebApiKeys";
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="sessions" element={<Sessions />} />
-          <Route path="chat" element={<ChatRooms />} />
-          <Route path="directory" element={<Directory />} />
-          <Route path="webapi" element={<WebApiKeys />} />
-          <Route path="im" element={<InstantMessage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
+      <ConfirmProvider>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<Users />} />
+            <Route path="sessions" element={<Sessions />} />
+            <Route path="chat" element={<ChatRooms />} />
+            <Route path="directory" element={<Directory />} />
+            <Route path="webapi" element={<WebApiKeys />} />
+            <Route path="im" element={<InstantMessage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+        <Toaster position="top-right" />
+      </ConfirmProvider>
     </BrowserRouter>
   );
 }

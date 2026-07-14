@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { api } from "../api/client";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { TerminalFrame } from "../components/TerminalFrame";
 
 export function InstantMessage() {
@@ -8,11 +9,9 @@ export function InstantMessage() {
   const [to, setTo] = useState("");
   const [text, setText] = useState("");
   const [log, setLog] = useState<string[]>([]);
-  const [error, setError] = useState("");
 
   async function onSend(e: FormEvent) {
     e.preventDefault();
-    setError("");
     try {
       await api.sendIM(from.trim(), to.trim(), text);
       setLog((prev) => [
@@ -20,8 +19,9 @@ export function InstantMessage() {
         ...prev,
       ].slice(0, 20));
       setText("");
+      toast.success("IM sent");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "send failed");
+      toast.error(err instanceof Error ? err.message : "send failed");
     }
   }
 
@@ -65,7 +65,6 @@ export function InstantMessage() {
             </div>
             <Button type="submit">send im</Button>
           </form>
-          {error && <div className="msg err" style={{ marginTop: 12 }}>{error}</div>}
         </div>
       </div>
 

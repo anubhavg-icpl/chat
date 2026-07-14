@@ -5,7 +5,9 @@ import {
   type User,
   type UserAccount,
 } from "../api/client";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,9 +21,7 @@ export function Users() {
   const [groupName, setGroupName] = useState("Buddies");
   const [buddyName, setBuddyName] = useState("");
   const [buddyGroupId, setBuddyGroupId] = useState<number | "">("");
-  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(
-    null,
-  );
+  const confirm = useConfirm();
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -29,12 +29,8 @@ export function Users() {
     try {
       const data = await api.getUsers();
       setUsers(data || []);
-      setMsg(null);
     } catch (e) {
-      setMsg({
-        type: "err",
-        text: e instanceof Error ? e.message : "failed to load users",
-      });
+      toast.error(e instanceof Error ? e.message : "failed to load users");
     } finally {
       setLoading(false);
     }
@@ -52,10 +48,7 @@ export function Users() {
       setFeedbag(fb || []);
       if (fb?.[0]) setBuddyGroupId(fb[0].group_id);
     } catch (e) {
-      setMsg({
-        type: "err",
-        text: e instanceof Error ? e.message : "failed to load account",
-      });
+      toast.error(e instanceof Error ? e.message : "failed to load account");
     }
   }, []);
 
@@ -70,34 +63,37 @@ export function Users() {
   async function onCreate(e: FormEvent) {
     e.preventDefault();
     try {
-      await api.createUser(screenName.trim(), password);
-      setMsg({ type: "ok", text: `created ${screenName.trim()}` });
+      const sn = screenName.trim();
+      await api.createUser(sn, password);
+      toast.success(`created ${sn}`);
       setScreenName("");
       setPassword("");
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "create failed",
-      });
+      toast.error(err instanceof Error ? err.message : "create failed");
     }
   }
 
   async function onDelete(name: string) {
-    if (!confirm(`delete user ${name}?`)) return;
+    if (
+      !(await confirm({
+        title: "Delete user",
+        description: `Permanently delete ${name}?`,
+        action: "Delete",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await api.deleteUser(name);
       if (selected === name) {
         setSelected(null);
         setAccount(null);
       }
-      setMsg({ type: "ok", text: `deleted ${name}` });
+      toast.success(`deleted ${name}`);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "delete failed",
-      });
+      toast.error(err instanceof Error ? err.message : "delete failed");
     }
   }
 
@@ -106,12 +102,9 @@ export function Users() {
     if (!next) return;
     try {
       await api.setPassword(name, next);
-      setMsg({ type: "ok", text: `password updated for ${name}` });
+      toast.success(`password updated for ${name}`);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "password update failed",
-      });
+      toast.error(err instanceof Error ? err.message : "password update failed");
     }
   }
 
@@ -119,14 +112,11 @@ export function Users() {
     if (!selected) return;
     try {
       await api.patchAccount(selected, { suspended_status: status });
-      setMsg({ type: "ok", text: `suspend status → ${status || "cleared"}` });
+      toast.success(`suspend status → ${status || "cleared"}`);
       await loadDetail(selected);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "patch failed",
-      });
+      toast.error(err instanceof Error ? err.message : "patch failed");
     }
   }
 
@@ -134,14 +124,11 @@ export function Users() {
     if (!selected || !account) return;
     try {
       await api.patchAccount(selected, { is_bot: !account.is_bot });
-      setMsg({ type: "ok", text: `is_bot → ${!account.is_bot}` });
+      toast.success(`is_bot → ${!account.is_bot}`);
       await loadDetail(selected);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "patch failed",
-      });
+      toast.error(err instanceof Error ? err.message : "patch failed");
     }
   }
 
@@ -151,13 +138,10 @@ export function Users() {
     try {
       await api.addLinkedAccount(selected, linkName.trim());
       setLinkName("");
-      setMsg({ type: "ok", text: "linked account added" });
+      toast.success("linked account added");
       await loadDetail(selected);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "link failed",
-      });
+      toast.error(err instanceof Error ? err.message : "link failed");
     }
   }
 
@@ -165,13 +149,10 @@ export function Users() {
     if (!selected) return;
     try {
       await api.removeLinkedAccount(selected, name);
-      setMsg({ type: "ok", text: `unlinked ${name}` });
+      toast.success(`unlinked ${name}`);
       await loadDetail(selected);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "unlink failed",
-      });
+      toast.error(err instanceof Error ? err.message : "unlink failed");
     }
   }
 
@@ -181,13 +162,10 @@ export function Users() {
     try {
       const g = await api.createFeedbagGroup(selected, groupName.trim());
       setBuddyGroupId(g.group_id);
-      setMsg({ type: "ok", text: `group ${g.group_name} (#${g.group_id})` });
+      toast.success(`group ${g.group_name} (#${g.group_id})`);
       await loadDetail(selected);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "group create failed",
-      });
+      toast.error(err instanceof Error ? err.message : "group create failed");
     }
   }
 
@@ -195,15 +173,13 @@ export function Users() {
     e.preventDefault();
     if (!selected || buddyGroupId === "" || !buddyName.trim()) return;
     try {
-      await api.addBuddy(selected, Number(buddyGroupId), buddyName.trim());
+      const buddy = buddyName.trim();
+      await api.addBuddy(selected, Number(buddyGroupId), buddy);
       setBuddyName("");
-      setMsg({ type: "ok", text: `buddy ${buddyName.trim()} added` });
+      toast.success(`buddy ${buddy} added`);
       await loadDetail(selected);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "add buddy failed",
-      });
+      toast.error(err instanceof Error ? err.message : "add buddy failed");
     }
   }
 
@@ -211,13 +187,10 @@ export function Users() {
     if (!selected) return;
     try {
       await api.removeBuddy(selected, groupId, buddy);
-      setMsg({ type: "ok", text: `removed ${buddy}` });
+      toast.success(`removed ${buddy}`);
       await loadDetail(selected);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "remove buddy failed",
-      });
+      toast.error(err instanceof Error ? err.message : "remove buddy failed");
     }
   }
 
@@ -252,11 +225,6 @@ export function Users() {
             </div>
             <Button type="submit">create</Button>
           </form>
-          {msg && (
-            <div className={`msg ${msg.type}`} style={{ marginTop: 12 }}>
-              {msg.text}
-            </div>
-          )}
         </div>
       </div>
 

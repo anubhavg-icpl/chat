@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, type Session } from "../api/client";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 function formatDuration(seconds?: number) {
   const s = Math.max(0, Math.floor(seconds || 0));
@@ -14,17 +16,16 @@ function formatDuration(seconds?: number) {
 
 export function Sessions() {
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const confirm = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.getSessions();
       setSessions(data?.sessions || []);
-      setError("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "failed to load sessions");
+      toast.error(e instanceof Error ? e.message : "failed to load sessions");
     } finally {
       setLoading(false);
     }
@@ -37,12 +38,21 @@ export function Sessions() {
   }, [load]);
 
   async function kick(name: string) {
-    if (!confirm(`kick session ${name}?`)) return;
+    if (
+      !(await confirm({
+        title: "Kick session",
+        description: `End the active session for ${name}?`,
+        action: "Kick",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await api.kickSession(name);
+      toast.success(`kicked ${name}`);
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "kick failed");
+      toast.error(e instanceof Error ? e.message : "kick failed");
     }
   }
 
@@ -54,7 +64,6 @@ export function Sessions() {
           refresh
         </Button>
       </div>
-      {error && <div className="msg err" style={{ margin: 16 }}>{error}</div>}
       <div className="table-wrap">
         {loading && sessions.length === 0 ? (
           <div className="empty">scanning…</div>

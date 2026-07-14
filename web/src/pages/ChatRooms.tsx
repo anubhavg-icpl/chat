@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { api, type ChatRoom } from "../api/client";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function ChatRooms() {
   const [publicRooms, setPublicRooms] = useState<ChatRoom[]>([]);
   const [privateRooms, setPrivateRooms] = useState<ChatRoom[]>([]);
   const [name, setName] = useState("");
-  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(
-    null,
-  );
+  const confirm = useConfirm();
 
   const load = useCallback(async () => {
     try {
@@ -18,12 +18,8 @@ export function ChatRooms() {
       ]);
       setPublicRooms(pub || []);
       setPrivateRooms(priv || []);
-      setMsg(null);
     } catch (e) {
-      setMsg({
-        type: "err",
-        text: e instanceof Error ? e.message : "failed to load rooms",
-      });
+      toast.error(e instanceof Error ? e.message : "failed to load rooms");
     }
   }, []);
 
@@ -34,29 +30,32 @@ export function ChatRooms() {
   async function onCreate(e: FormEvent) {
     e.preventDefault();
     try {
-      await api.createPublicRoom(name.trim());
+      const room = name.trim();
+      await api.createPublicRoom(room);
       setName("");
-      setMsg({ type: "ok", text: `created room ${name.trim()}` });
+      toast.success(`created room ${room}`);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "create failed",
-      });
+      toast.error(err instanceof Error ? err.message : "create failed");
     }
   }
 
   async function onDelete(roomName: string) {
-    if (!confirm(`delete room ${roomName}?`)) return;
+    if (
+      !(await confirm({
+        title: "Delete room",
+        description: `Permanently delete ${roomName}?`,
+        action: "Delete",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await api.deletePublicRooms([roomName]);
-      setMsg({ type: "ok", text: `deleted ${roomName}` });
+      toast.success(`deleted ${roomName}`);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "delete failed",
-      });
+      toast.error(err instanceof Error ? err.message : "delete failed");
     }
   }
 
@@ -82,7 +81,6 @@ export function ChatRooms() {
             </div>
             <Button type="submit">create</Button>
           </form>
-          {msg && <div className={`msg ${msg.type}`} style={{ marginTop: 12 }}>{msg.text}</div>}
         </div>
       </div>
 
@@ -146,7 +144,7 @@ function RoomTable({
                       <Button
                         variant="destructive"
                         type="button"
-                        onClick={() => onDelete?.(r.name)}
+                        onClick={() => void onDelete?.(r.name)}
                       >
                         delete
                       </Button>

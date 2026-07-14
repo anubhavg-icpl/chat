@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { api, type WebAPIKey } from "../api/client";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function WebApiKeys() {
   const [keys, setKeys] = useState<WebAPIKey[]>([]);
@@ -8,20 +10,14 @@ export function WebApiKeys() {
   const [origins, setOrigins] = useState("http://localhost:3000");
   const [rateLimit, setRateLimit] = useState(120);
   const [createdSecret, setCreatedSecret] = useState("");
-  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(
-    null,
-  );
+  const confirm = useConfirm();
 
   const load = useCallback(async () => {
     try {
       const data = await api.getWebApiKeys();
       setKeys(data || []);
-      setMsg(null);
     } catch (e) {
-      setMsg({
-        type: "err",
-        text: e instanceof Error ? e.message : "load keys failed",
-      });
+      toast.error(e instanceof Error ? e.message : "load keys failed");
     }
   }, []);
 
@@ -41,43 +37,39 @@ export function WebApiKeys() {
         rate_limit: rateLimit,
       });
       setCreatedSecret(created.dev_key || "");
-      setMsg({
-        type: "ok",
-        text: `created key ${created.dev_id} — secret shown once below`,
-      });
+      toast.success(`created key ${created.dev_id} — secret shown below`);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "create failed",
-      });
+      toast.error(err instanceof Error ? err.message : "create failed");
     }
   }
 
   async function onToggle(key: WebAPIKey) {
     try {
       await api.updateWebApiKey(key.dev_id, { is_active: !key.is_active });
-      setMsg({ type: "ok", text: `is_active → ${!key.is_active}` });
+      toast.success(`is_active → ${!key.is_active}`);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "update failed",
-      });
+      toast.error(err instanceof Error ? err.message : "update failed");
     }
   }
 
   async function onDelete(id: string) {
-    if (!confirm(`delete webapi key ${id}?`)) return;
+    if (
+      !(await confirm({
+        title: "Delete API key",
+        description: `Permanently delete key ${id}?`,
+        action: "Delete",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await api.deleteWebApiKey(id);
-      setMsg({ type: "ok", text: `deleted ${id}` });
+      toast.success(`deleted ${id}`);
       await load();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "delete failed",
-      });
+      toast.error(err instanceof Error ? err.message : "delete failed");
     }
   }
 
@@ -117,11 +109,6 @@ export function WebApiKeys() {
             </div>
             <Button type="submit">create key</Button>
           </form>
-          {msg && (
-            <div className={`msg ${msg.type}`} style={{ marginTop: 12 }}>
-              {msg.text}
-            </div>
-          )}
           {createdSecret && (
             <div className="msg ok" style={{ marginTop: 12 }}>
               dev_key (copy now): {createdSecret}

@@ -4,7 +4,9 @@ import {
   type DirectoryCategory,
   type DirectoryKeyword,
 } from "../api/client";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function Directory() {
   const [categories, setCategories] = useState<DirectoryCategory[]>([]);
@@ -12,20 +14,14 @@ export function Directory() {
   const [keywords, setKeywords] = useState<DirectoryKeyword[]>([]);
   const [catName, setCatName] = useState("");
   const [kwName, setKwName] = useState("");
-  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(
-    null,
-  );
+  const confirm = useConfirm();
 
   const loadCats = useCallback(async () => {
     try {
       const data = await api.getDirectoryCategories();
       setCategories(data || []);
-      setMsg(null);
     } catch (e) {
-      setMsg({
-        type: "err",
-        text: e instanceof Error ? e.message : "load categories failed",
-      });
+      toast.error(e instanceof Error ? e.message : "load categories failed");
     }
   }, []);
 
@@ -35,10 +31,7 @@ export function Directory() {
       setKeywords(data || []);
     } catch (e) {
       setKeywords([]);
-      setMsg({
-        type: "err",
-        text: e instanceof Error ? e.message : "load keywords failed",
-      });
+      toast.error(e instanceof Error ? e.message : "load keywords failed");
     }
   }, []);
 
@@ -55,31 +48,33 @@ export function Directory() {
     try {
       await api.createDirectoryCategory(catName.trim());
       setCatName("");
-      setMsg({ type: "ok", text: "category created" });
+      toast.success("category created");
       await loadCats();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "create category failed",
-      });
+      toast.error(err instanceof Error ? err.message : "create category failed");
     }
   }
 
   async function onDeleteCat(id: number) {
-    if (!confirm(`delete category #${id}?`)) return;
+    if (
+      !(await confirm({
+        title: "Delete category",
+        description: `Delete category #${id} and its keywords?`,
+        action: "Delete",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await api.deleteDirectoryCategory(id);
       if (selected === id) {
         setSelected(null);
         setKeywords([]);
       }
-      setMsg({ type: "ok", text: `deleted category #${id}` });
+      toast.success(`deleted category #${id}`);
       await loadCats();
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "delete failed",
-      });
+      toast.error(err instanceof Error ? err.message : "delete failed");
     }
   }
 
@@ -89,13 +84,10 @@ export function Directory() {
     try {
       await api.createDirectoryKeyword(kwName.trim(), selected);
       setKwName("");
-      setMsg({ type: "ok", text: "keyword created" });
+      toast.success("keyword created");
       await loadKeywords(selected);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "create keyword failed",
-      });
+      toast.error(err instanceof Error ? err.message : "create keyword failed");
     }
   }
 
@@ -103,19 +95,15 @@ export function Directory() {
     if (selected == null) return;
     try {
       await api.deleteDirectoryKeyword(id);
-      setMsg({ type: "ok", text: `deleted keyword #${id}` });
+      toast.success(`deleted keyword #${id}`);
       await loadKeywords(selected);
     } catch (err) {
-      setMsg({
-        type: "err",
-        text: err instanceof Error ? err.message : "delete keyword failed",
-      });
+      toast.error(err instanceof Error ? err.message : "delete keyword failed");
     }
   }
 
   return (
     <>
-      {msg && <div className={`msg ${msg.type}`}>{msg.text}</div>}
       <div className="grid split">
         <div className="card">
           <div className="card-head">
