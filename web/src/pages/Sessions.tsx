@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, type Session } from "../api/client";
+import { Skeleton } from "@/components/Skeleton";
 import { useConfirm } from "@/components/ConfirmProvider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -66,7 +67,50 @@ export function Sessions() {
       </div>
       <div className="table-wrap">
         {loading && sessions.length === 0 ? (
-          <div className="empty">scanning…</div>
+          <table>
+            <thead>
+              <tr>
+                <th>screen name</th>
+                <th>type</th>
+                <th>online</th>
+                <th>idle</th>
+                <th>state</th>
+                <th>instances</th>
+                <th>remote</th>
+                <th>actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i}>
+                  <td>
+                    <Skeleton className="h-4 w-24" />
+                  </td>
+                  <td>
+                    <Skeleton className="h-5 w-12" />
+                  </td>
+                  <td>
+                    <Skeleton className="h-4 w-12" />
+                  </td>
+                  <td>
+                    <Skeleton className="h-4 w-12" />
+                  </td>
+                  <td>
+                    <Skeleton className="h-5 w-16" />
+                  </td>
+                  <td>
+                    <Skeleton className="h-4 w-8" />
+                  </td>
+                  <td>
+                    <Skeleton className="h-4 w-28" />
+                  </td>
+                  <td>
+                    <Skeleton className="h-7 w-14" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : sessions.length === 0 ? (
           <div className="empty">no active sessions</div>
         ) : (

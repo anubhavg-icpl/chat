@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/Skeleton";
+import { TerminalFrame } from "../components/TerminalFrame";
 import {
   api,
   type ApiProbe,
@@ -7,7 +9,6 @@ import {
   type VersionInfo,
   type WebAPIKey,
 } from "../api/client";
-import { TerminalFrame } from "../components/TerminalFrame";
 
 export function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
@@ -69,24 +70,32 @@ export function Dashboard() {
       <div className="grid stats">
         <div className="card stat">
           <div className="label">Accounts</div>
-          <div className="value">{loading ? "…" : users.length}</div>
+          <div className="value">
+            {loading ? <Skeleton className="h-9 w-16" /> : users.length}
+          </div>
           <div className="hint">
             {aimUsers} AIM · {icqUsers} ICQ
           </div>
         </div>
         <div className="card stat">
           <div className="label">Online</div>
-          <div className="value">{loading ? "…" : online}</div>
+          <div className="value">
+            {loading ? <Skeleton className="h-9 w-16" /> : online}
+          </div>
           <div className="hint">Active sessions</div>
         </div>
         <div className="card stat">
           <div className="label">Chat rooms</div>
-          <div className="value">{loading ? "…" : rooms}</div>
+          <div className="value">
+            {loading ? <Skeleton className="h-9 w-16" /> : rooms}
+          </div>
           <div className="hint">Public + private</div>
         </div>
         <div className="card stat">
           <div className="label">Web API keys</div>
-          <div className="value">{loading ? "…" : keys.length}</div>
+          <div className="value">
+            {loading ? <Skeleton className="h-9 w-16" /> : keys.length}
+          </div>
           <div className="hint">{categories} directory categories</div>
         </div>
       </div>

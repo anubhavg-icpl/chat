@@ -165,3 +165,18 @@ webapi-keygen: ## Build the Web API key generator tool
 .PHONY: webapi-keygen-install
 webapi-keygen-install: ## Install the Web API key generator tool system-wide
 	go install ./cmd/webapi_keygen
+
+################################################################################
+# Client Tools
+################################################################################
+
+.PHONY: tocbot
+tocbot: ## Build the TOC protocol bot binary (connects to the TOC server on :9898)
+	go build -o tocbot ./cmd/tocbot
+
+.PHONY: admin
+admin: ## Build the management API admin CLI
+	go build -o oscar-admin ./cmd/admin
+
+.PHONY: clients
+clients: tocbot admin ## Build all client tools (TOC bot + admin CLI)

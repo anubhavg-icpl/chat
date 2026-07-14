@@ -1,4 +1,9 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { Moon, Search, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CommandPalette } from "@/components/CommandPalette";
+import { useTheme } from "@/hooks/useTheme";
 
 const links = [
   { to: "/", label: "Dashboard", end: true },
@@ -23,6 +28,19 @@ const titles: Record<string, string> = {
 export function Layout() {
   const { pathname } = useLocation();
   const title = titles[pathname] || "Console";
+  const { theme, toggle } = useTheme();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <div className="shell">
@@ -57,12 +75,34 @@ export function Layout() {
             {title}
             <span>Operator console</span>
           </h1>
-          <div className="badge online">Live</div>
+          <div className="topbar-actions">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+            >
+              <Search />
+              <span>Search</span>
+              <kbd className="cmdk-kbd">⌘K</kbd>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              type="button"
+              aria-label="Toggle theme"
+              onClick={toggle}
+            >
+              {theme === "dark" ? <Sun /> : <Moon />}
+            </Button>
+            <div className="badge online">Live</div>
+          </div>
         </header>
         <main className="content">
           <Outlet />
         </main>
       </div>
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );
 }

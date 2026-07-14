@@ -5,6 +5,7 @@ import {
   type User,
   type UserAccount,
 } from "../api/client";
+import { Skeleton } from "@/components/Skeleton";
 import { useConfirm } from "@/components/ConfirmProvider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -235,7 +236,34 @@ export function Users() {
           </div>
           <div className="table-wrap">
             {loading ? (
-              <div className="empty">loading…</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>screen name</th>
+                    <th>type</th>
+                    <th>status</th>
+                    <th>actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <tr key={i}>
+                      <td>
+                        <Skeleton className="h-4 w-28" />
+                      </td>
+                      <td>
+                        <Skeleton className="h-5 w-12" />
+                      </td>
+                      <td>
+                        <Skeleton className="h-4 w-16" />
+                      </td>
+                      <td>
+                        <Skeleton className="h-7 w-28" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             ) : users.length === 0 ? (
               <div className="empty">no users</div>
             ) : (

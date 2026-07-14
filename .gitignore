@@ -9,3 +9,9 @@ certs/
 node_modules/
 web/node_modules/
 web/dist/
+
+# built binaries (repo root only)
+/open_oscar_server
+/webapi_keygen
+/tocbot
+/oscar-admin
