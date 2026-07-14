@@ -180,3 +180,18 @@ admin: ## Build the management API admin CLI
 
 .PHONY: clients
 clients: tocbot admin ## Build all client tools (TOC bot + admin CLI)
+
+.PHONY: aibot
+aibot: ## Build the LLM AIM bot (OpenAI-compatible; needs OPENAI_API_KEY to run)
+	go build -o aibot ./cmd/aibot
+
+.PHONY: discord-bridge
+discord-bridge: ## Build the Discord<->AIM bridge (needs DISCORD_TOKEN to run)
+	go build -o discord-bridge ./cmd/discord-bridge
+
+.PHONY: irc-bridge
+irc-bridge: ## Build the IRC<->AIM bridge (stdlib IRC)
+	go build -o irc-bridge ./cmd/irc-bridge
+
+.PHONY: bridges
+bridges: discord-bridge irc-bridge ## Build all bridges
